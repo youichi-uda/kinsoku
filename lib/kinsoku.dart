@@ -14,3 +14,4 @@ export 'src/yakumono_adjuster.dart';
 export 'src/kerning_processor.dart';
 export 'src/models/character_type.dart';
 export 'src/models/position.dart';
+export 'src/models/text_alignment.dart';
