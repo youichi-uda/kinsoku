@@ -1,10 +1,15 @@
 name: kinsoku
-description: Japanese text processing library for kinsoku (line breaking rules), character classification, yakumono adjustment, and kerning. Pure Dart package with no Flutter dependencies.
-version: 0.1.0
+description: Japanese text processing library for kinsoku (line breaking rules), character classification, yakumono adjustment, and kerning. Supports JIS X 4051:2004 with ICU.
+version: 0.2.0
+homepage: https://github.com/youichi-uda/kinsoku
 repository: https://github.com/youichi-uda/kinsoku
+issue_tracker: https://github.com/youichi-uda/kinsoku/issues
 
 environment:
   sdk: ^3.10.3
+
+dependencies:
+  ffi: ^2.1.0
 
 dev_dependencies:
   test: ^1.24.0
