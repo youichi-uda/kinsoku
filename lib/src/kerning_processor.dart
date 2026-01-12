@@ -47,15 +47,12 @@ class KerningProcessor {
   };
 
   /// Get kerning adjustment between two characters
-  /// 
+  ///
   /// Returns the spacing adjustment (negative = tighter, positive = looser)
   /// in units of character width (e.g., -0.3 means 0.3 characters tighter)
   static double getKerning(String char1, String char2) {
-    if (kerningPairs.containsKey(char1) &&
-        kerningPairs[char1]!.containsKey(char2)) {
-      return kerningPairs[char1]![char2]!;
-    }
-    return 0.0;
+    // Single lookup with null-aware operators for better performance
+    return kerningPairs[char1]?[char2] ?? 0.0;
   }
 
   /// Get standard yakumono kerning (for punctuation marks)

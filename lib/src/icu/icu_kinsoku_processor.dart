@@ -49,6 +49,22 @@ class ICUKinsokuProcessor {
     return ICUKinsokuProcessor();
   }
 
+  /// Convert character map to ICU character class format
+  ///
+  /// Handles both BMP and supplementary characters (surrogate pairs)
+  static String _toICUClass(Map<String, String> charMap) {
+    final codes = charMap.values.map((code) {
+      final codePoint = code.runes.first;
+      if (codePoint > 0xFFFF) {
+        // Supplementary character: use \\U with 8 hex digits
+        return '\\U${codePoint.toRadixString(16).padLeft(8, '0').toUpperCase()}';
+      }
+      // BMP character: use \\u with 4 hex digits
+      return '\\u${codePoint.toRadixString(16).padLeft(4, '0').toUpperCase()}';
+    }).join(' ');
+    return '[$codes]';
+  }
+
   /// Build complete JIS X 4051:2004 compliant rules
   ///
   /// This generates ICU break iterator rules with full JIS X 4051:2004 compliance.
@@ -61,15 +77,6 @@ class ICUKinsokuProcessor {
     buffer.writeln('# Japanese Document Composition Method');
     buffer.writeln('# ========================================');
     buffer.writeln();
-
-    // Helper function to convert character map to ICU character class
-    String _toICUClass(Map<String, String> charMap) {
-      final codes = charMap.values.map((code) {
-        final hex = code.codeUnitAt(0).toRadixString(16).padLeft(4, '0').toUpperCase();
-        return '\\u$hex';
-      }).join(' ');
-      return '[$codes]';
-    }
 
     // Class 1: Opening brackets (始め括弧類) - Line-end forbidden
     buffer.writeln('# Class 1: Opening brackets (始め括弧類)');

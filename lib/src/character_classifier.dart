@@ -2,80 +2,119 @@ import 'models/character_type.dart';
 
 /// Classifier for determining character types and properties
 class CharacterClassifier {
+  // Performance: Static const sets are created once at class load time
+
+  /// Yakumono characters (Japanese typography symbols)
+  static const _yakumonoChars = {
+    '。', '、', '・', '（', '）', '「', '」', '【', '】',
+    '『', '』', '〈', '〉', '《', '》', '！', '？', '：', '；',
+    'ー', // Long vowel mark (U+30FC)
+    '―', // Horizontal bar / Dash (U+2015)
+    '—', // Em dash (U+2014)
+    '–', // En dash (U+2013)
+    '－', // Fullwidth hyphen-minus (U+FF0D)
+    '〜', '…', '‥', '＿', '＝',
+  };
+
+  /// Rotatable yakumono characters (need rotation in vertical text)
+  static const _rotatableYakumono = {
+    '（', '）', '「', '」', '【', '】', '『', '』',
+    '〈', '〉', '《', '》',
+    'ー', // Long vowel mark (U+30FC)
+    '―', // Horizontal bar / Dash (U+2015)
+    '—', // Em dash (U+2014)
+    '–', // En dash (U+2013)
+    '－', // Fullwidth hyphen-minus (U+FF0D)
+    '〜', '…', '‥',
+  };
+
+  /// Small kana characters (includes JIS X 4051 class 8)
+  static const _smallKana = {
+    'ぁ', 'ぃ', 'ぅ', 'ぇ', 'ぉ', // small hiragana vowels
+    'ゃ', 'ゅ', 'ょ', 'ゎ', 'っ', // small hiragana
+    'ゕ', 'ゖ', // small hiragana ka, ke
+    'ァ', 'ィ', 'ゥ', 'ェ', 'ォ', // small katakana vowels
+    'ャ', 'ュ', 'ョ', 'ヮ', 'ッ', // small katakana
+    'ヵ', 'ヶ', // small katakana ka, ke
+  };
+
+  /// Opening brackets
+  static const _openingBrackets = {'（', '「', '【', '『', '〈', '《'};
+
+  /// Closing brackets
+  static const _closingBrackets = {'）', '」', '】', '』', '〉', '》'};
+
   /// Classify a single character
+  ///
+  /// Supports surrogate pairs for characters outside BMP (e.g., CJK Extension B)
   static CharacterType classify(String character) {
     if (character.isEmpty) return CharacterType.space;
-    
-    final codeUnit = character.codeUnitAt(0);
-    
-    // Space
-    if (codeUnit == 0x0020 || codeUnit == 0x3000) {
+
+    // Use runes for proper surrogate pair handling
+    final codePoint = character.runes.first;
+
+    // Space (ASCII space and ideographic space)
+    if (codePoint == 0x0020 || codePoint == 0x3000) {
       return CharacterType.space;
     }
-    
-    // Latin alphabet
-    if ((codeUnit >= 0x0041 && codeUnit <= 0x005A) || // A-Z
-        (codeUnit >= 0x0061 && codeUnit <= 0x007A)) { // a-z
+
+    // Latin alphabet (half-width and full-width)
+    if ((codePoint >= 0x0041 && codePoint <= 0x005A) || // A-Z
+        (codePoint >= 0x0061 && codePoint <= 0x007A) || // a-z
+        (codePoint >= 0xFF21 && codePoint <= 0xFF3A) || // Ａ-Ｚ
+        (codePoint >= 0xFF41 && codePoint <= 0xFF5A)) { // ａ-ｚ
       return CharacterType.latin;
     }
-    
-    // Numbers
-    if (codeUnit >= 0x0030 && codeUnit <= 0x0039) { // 0-9
+
+    // Numbers (half-width and full-width)
+    if ((codePoint >= 0x0030 && codePoint <= 0x0039) || // 0-9
+        (codePoint >= 0xFF10 && codePoint <= 0xFF19)) { // ０-９
       return CharacterType.number;
     }
-    
+
     // Hiragana
-    if (codeUnit >= 0x3040 && codeUnit <= 0x309F) {
+    if (codePoint >= 0x3040 && codePoint <= 0x309F) {
       return CharacterType.hiragana;
     }
 
     // Yakumono (Japanese punctuation and symbols)
     // Check this before Katakana to catch long vowel mark (ー, U+30FC)
-    if (_isYakumono(character)) {
+    if (_yakumonoChars.contains(character)) {
       return CharacterType.yakumono;
     }
 
     // Katakana
-    if (codeUnit >= 0x30A0 && codeUnit <= 0x30FF) {
+    if (codePoint >= 0x30A0 && codePoint <= 0x30FF) {
       return CharacterType.katakana;
     }
-    
-    // Punctuation
-    if (_isPunctuation(codeUnit)) {
+
+    // Punctuation (ASCII punctuation only)
+    if (_isPunctuation(codePoint)) {
       return CharacterType.punctuation;
     }
-    
-    // CJK Unified Ideographs (Kanji)
-    if ((codeUnit >= 0x4E00 && codeUnit <= 0x9FFF) ||
-        (codeUnit >= 0x3400 && codeUnit <= 0x4DBF) ||
-        (codeUnit >= 0x20000 && codeUnit <= 0x2A6DF)) {
+
+    // CJK Unified Ideographs (Kanji) - with proper surrogate pair support
+    if ((codePoint >= 0x4E00 && codePoint <= 0x9FFF) ||   // CJK Unified Ideographs
+        (codePoint >= 0x3400 && codePoint <= 0x4DBF) ||   // CJK Extension A
+        (codePoint >= 0x20000 && codePoint <= 0x2A6DF) || // CJK Extension B
+        (codePoint >= 0x2A700 && codePoint <= 0x2B73F) || // CJK Extension C
+        (codePoint >= 0x2B740 && codePoint <= 0x2B81F) || // CJK Extension D
+        (codePoint >= 0x2B820 && codePoint <= 0x2CEAF) || // CJK Extension E
+        (codePoint >= 0x2CEB0 && codePoint <= 0x2EBEF) || // CJK Extension F
+        (codePoint >= 0x30000 && codePoint <= 0x3134F) || // CJK Extension G
+        (codePoint >= 0xF900 && codePoint <= 0xFAFF)) {   // CJK Compatibility Ideographs
       return CharacterType.kanji;
     }
-    
+
     return CharacterType.kanji; // Default for unknown characters
   }
 
-  /// Check if character is yakumono (Japanese typography symbols)
-  static bool _isYakumono(String character) {
-    const yakumonoChars = {
-      '。', '、', '・', '（', '）', '「', '」', '【', '】',
-      '『', '』', '〈', '〉', '《', '》', '！', '？', '：', '；',
-      'ー', // Long vowel mark (U+30FC)
-      '―', // Horizontal bar / Dash (U+2015)
-      '—', // Em dash (U+2014)
-      '–', // En dash (U+2013)
-      '－', // Fullwidth hyphen-minus (U+FF0D)
-      '〜', '…', '‥', '＿', '＝'
-    };
-    return yakumonoChars.contains(character);
-  }
-
-  /// Check if code unit is punctuation
-  static bool _isPunctuation(int codeUnit) {
-    return (codeUnit >= 0x0021 && codeUnit <= 0x002F) || // !"#$%&'()*+,-./
-           (codeUnit >= 0x003A && codeUnit <= 0x0040) || // :;<=>?@
-           (codeUnit >= 0x005B && codeUnit <= 0x0060) || // [\]^_`
-           (codeUnit >= 0x007B && codeUnit <= 0x007E);   // {|}~
+  /// Check if code point is ASCII punctuation
+  static bool _isPunctuation(int codePoint) {
+    return (codePoint >= 0x0021 && codePoint <= 0x002F) || // !"#$%&'()*+,-./
+           (codePoint >= 0x003A && codePoint <= 0x0040) || // :;<=>?@
+           (codePoint >= 0x005B && codePoint <= 0x0060) || // [\]^_`
+           (codePoint >= 0x007B && codePoint <= 0x007E);   // {|}~
   }
 
   /// Check if character needs rotation in vertical text
@@ -83,33 +122,12 @@ class CharacterClassifier {
     final type = classify(character);
     return type == CharacterType.latin ||
            type == CharacterType.number ||
-           _isRotatableYakumono(character);
-  }
-
-  /// Check if yakumono should be rotated
-  static bool _isRotatableYakumono(String character) {
-    const rotatableYakumono = {
-      '（', '）', '「', '」', '【', '】', '『', '』',
-      '〈', '〉', '《', '》',
-      'ー', // Long vowel mark (U+30FC)
-      '―', // Horizontal bar / Dash (U+2015)
-      '—', // Em dash (U+2014)
-      '–', // En dash (U+2013)
-      '－', // Fullwidth hyphen-minus (U+FF0D)
-      '〜', '…', '‥'
-    };
-    return rotatableYakumono.contains(character);
+           _rotatableYakumono.contains(character);
   }
 
   /// Check if character is small kana (っゃゅょなど)
   static bool isSmallKana(String character) {
-    const smallKana = {
-      'ぁ', 'ぃ', 'ぅ', 'ぇ', 'ぉ', // small hiragana vowels
-      'ゃ', 'ゅ', 'ょ', 'ゎ', 'っ', // small hiragana
-      'ァ', 'ィ', 'ゥ', 'ェ', 'ォ', // small katakana vowels
-      'ャ', 'ュ', 'ョ', 'ヮ', 'ッ', // small katakana
-    };
-    return smallKana.contains(character);
+    return _smallKana.contains(character);
   }
 
   /// Check if character is a long vowel mark
@@ -119,13 +137,11 @@ class CharacterClassifier {
 
   /// Check if character is opening bracket
   static bool isOpeningBracket(String character) {
-    const openingBrackets = {'（', '「', '【', '『', '〈', '《'};
-    return openingBrackets.contains(character);
+    return _openingBrackets.contains(character);
   }
 
   /// Check if character is closing bracket
   static bool isClosingBracket(String character) {
-    const closingBrackets = {'）', '」', '】', '』', '〉', '》'};
-    return closingBrackets.contains(character);
+    return _closingBrackets.contains(character);
   }
 }

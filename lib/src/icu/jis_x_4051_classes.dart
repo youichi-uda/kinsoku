@@ -4,6 +4,7 @@
 /// JIS X 4051:2004 (Japanese document composition method).
 ///
 /// Reference: https://kikakurui.com/x4/X4051-2004-02.html
+library;
 
 class JisX4051Classes {
   /// Class 1: Opening brackets (始め括弧類)
@@ -134,8 +135,9 @@ class JisX4051Classes {
     '〻': '\u303B', // VERTICAL IDEOGRAPHIC ITERATION MARK
   };
 
-  /// Class 10: Currency symbols and unit symbols (通貨記号・単位記号)
+  /// Class 10: Currency symbols (通貨記号)
   /// 行末禁則（gyomatsu kinsoku） - Cannot appear at line end
+  /// Note: Unit symbols like ℃, ° moved to class 11 (postfix abbreviations)
   static const class10_currencyUnits = {
     '\$': '\u0024', // DOLLAR SIGN
     '¢': '\u00A2', // CENT SIGN
@@ -145,20 +147,18 @@ class JisX4051Classes {
     '￠': '\uFFE0', // FULLWIDTH CENT SIGN
     '￡': '\uFFE1', // FULLWIDTH POUND SIGN
     '￥': '\uFFE5', // FULLWIDTH YEN SIGN
-    '℃': '\u2103', // DEGREE CELSIUS
-    '°': '\u00B0', // DEGREE SIGN
     '%': '\u0025', // PERCENT SIGN
     '％': '\uFF05', // FULLWIDTH PERCENT SIGN
   };
 
-  /// Class 11: Postfix abbreviations (後置略語)
+  /// Class 11: Postfix abbreviations (後置略語・単位記号)
   /// 行頭禁則（gyoto kinsoku） - Cannot appear at line start
   static const class11_postfixAbbrev = {
     '℃': '\u2103', // DEGREE CELSIUS
+    '℉': '\u2109', // DEGREE FAHRENHEIT
     '°': '\u00B0', // DEGREE SIGN
     '′': '\u2032', // PRIME
     '″': '\u2033', // DOUBLE PRIME
-    '℉': '\u2109', // DEGREE FAHRENHEIT
   };
 
   /// Class 12: Prefix abbreviations (前置略語)
@@ -213,9 +213,17 @@ class JisX4051Classes {
     // These should not be separated from their base character
   };
 
+  // Performance: Cache computed sets to avoid repeated computation
+  static Set<String>? _cachedGyotoKinsoku;
+  static Set<String>? _cachedGyomatsuKinsoku;
+  static Set<String>? _cachedBurasageAllowed;
+  static Set<String>? _cachedPairedCharacters;
+
   /// Get all gyoto kinsoku characters (cannot appear at line start)
+  ///
+  /// Results are cached for performance.
   static Set<String> getAllGyotoKinsoku() {
-    return {
+    return _cachedGyotoKinsoku ??= {
       ...class2_closingBrackets.keys,
       ...class3_delimitersJa.keys,
       ...class4_periodComma.keys,
@@ -231,8 +239,10 @@ class JisX4051Classes {
   }
 
   /// Get all gyomatsu kinsoku characters (cannot appear at line end)
+  ///
+  /// Results are cached for performance.
   static Set<String> getAllGyomatsuKinsoku() {
-    return {
+    return _cachedGyomatsuKinsoku ??= {
       ...class1_openingBrackets.keys,
       ...class10_currencyUnits.keys,
       ...class12_prefixAbbrev.keys,
@@ -240,9 +250,11 @@ class JisX4051Classes {
   }
 
   /// Get characters that can hang (burasage allowed)
+  ///
+  /// According to JIS X 4051, these small characters can hang.
+  /// Results are cached for performance.
   static Set<String> getBurasageAllowed() {
-    // According to JIS X 4051, these small characters can hang
-    return {
+    return _cachedBurasageAllowed ??= {
       ...class2_closingBrackets.keys,
       ...class3_delimitersJa.keys,
       ...class5_middleDots.keys,
@@ -250,8 +262,10 @@ class JisX4051Classes {
   }
 
   /// Get paired characters that must not be separated
+  ///
+  /// Results are cached for performance.
   static Set<String> getPairedCharacters() {
-    return {
+    return _cachedPairedCharacters ??= {
       ...class13_dashes.keys,
       ...class14_ellipsis.keys,
     };
