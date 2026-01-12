@@ -2,6 +2,9 @@
 
 Japanese text processing library for kinsoku (禁則処理 - line breaking rules), character classification, yakumono adjustment, and kerning.
 
+[![pub package](https://img.shields.io/pub/v/kinsoku.svg)](https://pub.dev/packages/kinsoku)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 ## Features
 
 - **Kinsoku Shori (禁則処理)**: Japanese line breaking rules
@@ -30,13 +33,64 @@ Japanese text processing library for kinsoku (禁則処理 - line breaking rules
   - Kerning pairs for Japanese punctuation
   - Oikomi (push-in) adjustment calculations
 
+- **Text Alignment**: Line-level alignment options
+  - `TextAlignment.start` (天付き): Align to top/left
+  - `TextAlignment.center`: Center alignment
+  - `TextAlignment.end` (地付き): Align to bottom/right
+
+## Related Packages
+
+This package is part of the Japanese text layout suite:
+
+| Package | Description |
+|---------|-------------|
+| **kinsoku** | Core text processing (this package) |
+| [tategaki](https://pub.dev/packages/tategaki) | Vertical text layout (縦書き) |
+| [yokogaki](https://pub.dev/packages/yokogaki) | Horizontal text layout (横書き) |
+
+## Quick Start
+
+シンプルな禁則処理の例:
+
+```dart
+import 'package:kinsoku/kinsoku.dart';
+
+void main() {
+  final text = 'これは禁則処理のテストです。';
+
+  // 指定位置で改行できるか判定
+  if (KinsokuProcessor.canBreakAt(text, 10)) {
+    print('位置10で改行可能');
+  }
+
+  // 最適な改行位置を取得
+  final breakPos = KinsokuProcessor.findBreakPosition(text, 10);
+  print('推奨改行位置: $breakPos');
+}
+```
+
+## Platform Support
+
+| Platform | Pure Dart | ICU-based |
+|----------|:---------:|:---------:|
+| Flutter (All) | ✅ | - |
+| Web | ✅ | - |
+| Windows | ✅ | ✅ |
+| macOS | ✅ | ✅ |
+| Linux | ✅ | ✅ |
+| Server | ✅ | ✅ |
+
+**Requirements:**
+- Dart SDK: ≥3.10.3
+- ICU機能: ICUライブラリが必要（デスクトップ/サーバーのみ）
+
 ## Installation
 
 Add this to your package's `pubspec.yaml` file:
 
 ```yaml
 dependencies:
-  kinsoku: ^0.1.0
+  kinsoku: ^0.3.4
 ```
 
 Then run:
@@ -109,6 +163,29 @@ void main() {
 }
 ```
 
+### Text Alignment
+
+```dart
+import 'package:kinsoku/kinsoku.dart';
+
+void main() {
+  // Use TextAlignment for line-level alignment
+  final alignment = TextAlignment.end; // 地付き (bottom/right alignment)
+
+  switch (alignment) {
+    case TextAlignment.start:
+      print('天付き - Align to start');
+      break;
+    case TextAlignment.center:
+      print('Center alignment');
+      break;
+    case TextAlignment.end:
+      print('地付き - Align to end');
+      break;
+  }
+}
+```
+
 ### Kerning
 
 ```dart
@@ -131,7 +208,7 @@ void main() {
 }
 ```
 
-## ICU-based Kinsoku Processing (Optional) ⭐ NEW
+## ICU-based Kinsoku Processing (Optional)
 
 For full Unicode UAX #14 compliance with customizable rules, use the ICU-based processor:
 
@@ -213,7 +290,7 @@ final processor = ICUKinsokuProcessor.withCustomRules(rules);
 | **Customization** | Limited (static sets) | Extensive (custom rules) |
 | **Performance** | Fast | Fast (native) |
 | **Platform** | All platforms | Desktop/Server |
-| **JIS X 4051 Compliance** | Simplified | **Complete (16+ classes)** ✅ |
+| **JIS X 4051 Compliance** | Simplified | **Complete (16+ classes)** |
 
 ### JIS X 4051:2004 Complete Compliance
 
@@ -242,26 +319,106 @@ The ICU processor provides **full compliance** with JIS X 4051:2004:
 
 #### Line Breaking Rules
 
-✅ **Gyoto Kinsoku** (行頭禁則): 70+ characters cannot appear at line start
-✅ **Gyomatsu Kinsoku** (行末禁則): 25+ characters cannot appear at line end
-✅ **Paired Separation** (分離禁止): ……, ‥‥, ――, etc. must stay together
-✅ **Consecutive Punctuation**: ！！, ？？, ！？, ？！ cannot be separated
-✅ **Special Handling**: Currency symbols (¥£€), small kana, iteration marks
-
-### UAX #14 vs JIS X 4051
-
-| Feature | UAX #14 (Default) | JIS X 4051:2004 (Complete) |
-|---------|-------------------|----------------------------|
-| Character classes | Unicode-based | 16+ JIS-specific classes |
-| `/` (slash) | No break before | Allows break before |
-| `¥` `£` | Uniform handling | Currency class (10) |
-| `€` | Uniform handling | Currency class (10) |
-| Small kana | NS (non-starter) | Dedicated class (8) |
-| Iteration marks | Basic | Full coverage (class 9) |
-| Dashes | Basic | Complete (class 13) |
-| **Total compliance** | UAX #14 standard | **JIS X 4051:2004 full** ✅ |
+- **Gyoto Kinsoku** (行頭禁則): 70+ characters cannot appear at line start
+- **Gyomatsu Kinsoku** (行末禁則): 25+ characters cannot appear at line end
+- **Paired Separation** (分離禁止): ……, ‥‥, ――, etc. must stay together
+- **Consecutive Punctuation**: ！！, ？？, ！？, ？！ cannot be separated
+- **Special Handling**: Currency symbols (¥£€), small kana, iteration marks
 
 See `example/icu_example.dart` for comprehensive examples.
+
+## Use Cases / ユースケース
+
+### テキストエディタの改行処理
+
+ユーザー入力テキストの自動改行:
+
+```dart
+String wrapText(String text, int maxCharsPerLine) {
+  final lines = <String>[];
+  var remaining = text;
+
+  while (remaining.isNotEmpty) {
+    if (remaining.length <= maxCharsPerLine) {
+      lines.add(remaining);
+      break;
+    }
+
+    // 禁則を考慮した改行位置を取得
+    final breakPos = KinsokuProcessor.findBreakPosition(
+      remaining,
+      maxCharsPerLine,
+    );
+
+    lines.add(remaining.substring(0, breakPos));
+    remaining = remaining.substring(breakPos);
+  }
+
+  return lines.join('\n');
+}
+```
+
+### 文字種判定
+
+入力バリデーションやIME処理:
+
+```dart
+bool isJapaneseText(String text) {
+  for (final char in text.characters) {
+    final type = CharacterClassifier.classify(char);
+    if (type == CharacterType.hiragana ||
+        type == CharacterType.katakana ||
+        type == CharacterType.kanji) {
+      return true;
+    }
+  }
+  return false;
+}
+```
+
+### DTPソフトウェア
+
+プロフェッショナルな組版処理:
+
+```dart
+// JIS X 4051準拠の禁則処理（ICU使用）
+final processor = ICUKinsokuProcessor.withJISX4051Rules();
+
+// テキストの全改行位置を取得
+final breaks = processor.getAllBreakPositions(text);
+
+// カスタムルールで初期化
+final config = KinsokuConfig(
+  gyotoKinsoku: {'。', '、', '）', '」'},
+  gyomatsuKinsoku: {'（', '「'},
+  burasageAllowed: {'。', '、'},
+);
+final customProcessor = ICUKinsokuProcessor.withCustomRules(
+  config.toICURules(),
+);
+```
+
+### カーニング調整
+
+約物間のスペース最適化:
+
+```dart
+double calculateLineWidth(String line, double fontSize) {
+  double width = 0;
+  for (var i = 0; i < line.length; i++) {
+    width += fontSize;
+    if (i < line.length - 1) {
+      // 約物間のカーニング値を取得
+      final kerning = KerningProcessor.getKerning(
+        line[i],
+        line[i + 1],
+      );
+      width += kerning * fontSize;
+    }
+  }
+  return width;
+}
+```
 
 ## Pure Dart Package
 
