@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.5] - 2026-01-12
+
+### Changed
+- **CharacterClassifier**: Use `runes.first` for proper surrogate pair support (CJK Extension B-G)
+- **CharacterClassifier**: Add full-width number (０-９) and alphabet (Ａ-Ｚ, ａ-ｚ) classification
+- **CharacterClassifier**: Add missing small kana (ゕ, ゖ, ヵ, ヶ)
+- **CharacterClassifier**: Optimize constants to static const for better performance
+- **YakumonoAdjuster**: Reuse CharacterClassifier methods to eliminate code duplication
+- **KerningProcessor**: Simplify getKerning with null-aware operators
+- **ICUKinsokuProcessor**: Extract `_toICUClass` as static method with surrogate pair support
+- **JisX4051Classes**: Cache getAllGyotoKinsoku/getAllGyomatsuKinsoku results for performance
+- **JisX4051Classes**: Fix duplicate ℃/° entries between class 10 and 11
+
 ## [0.3.4] - 2026-01-11
 
 ### Added
