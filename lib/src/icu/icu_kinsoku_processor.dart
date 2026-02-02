@@ -424,7 +424,12 @@ class KinsokuConfig {
     if (gyotoKinsoku.isNotEmpty) {
       buffer.write(r'$GYOTO = [');
       for (final char in gyotoKinsoku) {
-        buffer.write('\\u${char.codeUnitAt(0).toRadixString(16).padLeft(4, '0')} ');
+        final codePoint = char.runes.first;
+        if (codePoint > 0xFFFF) {
+          buffer.write('\\U${codePoint.toRadixString(16).padLeft(8, '0').toUpperCase()} ');
+        } else {
+          buffer.write('\\u${codePoint.toRadixString(16).padLeft(4, '0')} ');
+        }
       }
       buffer.writeln('];');
     }
@@ -432,7 +437,12 @@ class KinsokuConfig {
     if (gyomatsuKinsoku.isNotEmpty) {
       buffer.write(r'$GYOMATSU = [');
       for (final char in gyomatsuKinsoku) {
-        buffer.write('\\u${char.codeUnitAt(0).toRadixString(16).padLeft(4, '0')} ');
+        final codePoint = char.runes.first;
+        if (codePoint > 0xFFFF) {
+          buffer.write('\\U${codePoint.toRadixString(16).padLeft(8, '0').toUpperCase()} ');
+        } else {
+          buffer.write('\\u${codePoint.toRadixString(16).padLeft(4, '0')} ');
+        }
       }
       buffer.writeln('];');
     }

@@ -1,6 +1,6 @@
 name: kinsoku
 description: Japanese text processing library for kinsoku (line breaking rules), character classification, yakumono adjustment, and kerning. Supports JIS X 4051:2004 with ICU.
-version: 0.3.5
+version: 0.3.6
 homepage: https://github.com/youichi-uda/kinsoku
 repository: https://github.com/youichi-uda/kinsoku
 issue_tracker: https://github.com/youichi-uda/kinsoku/issues

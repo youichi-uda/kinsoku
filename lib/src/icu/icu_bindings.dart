@@ -151,18 +151,21 @@ class ICUBindings {
 
   /// Load ICU library based on platform
   ffi.DynamicLibrary _loadICULibrary() {
+    Object? lastError;
+
     if (Platform.isWindows) {
       // Windows: Try common ICU library names
       for (final name in ['icuuc74.dll', 'icuuc73.dll', 'icuuc.dll']) {
         try {
           return ffi.DynamicLibrary.open(name);
-        } catch (_) {
+        } catch (e) {
+          lastError = e;
           continue;
         }
       }
       throw UnsupportedError(
         'ICU library not found on Windows. Please install ICU and ensure '
-        'icuuc.dll is in your PATH or system directory.',
+        'icuuc.dll is in your PATH or system directory. Last error: $lastError',
       );
     } else if (Platform.isMacOS) {
       // macOS: System ICU or Homebrew
@@ -173,24 +176,26 @@ class ICUBindings {
       ]) {
         try {
           return ffi.DynamicLibrary.open(path);
-        } catch (_) {
+        } catch (e) {
+          lastError = e;
           continue;
         }
       }
       throw UnsupportedError(
-        'ICU library not found on macOS. Install via: brew install icu4c',
+        'ICU library not found on macOS. Install via: brew install icu4c. Last error: $lastError',
       );
     } else if (Platform.isLinux) {
       // Linux: System ICU
       for (final name in ['libicuuc.so', 'libicuuc.so.74', 'libicuuc.so.73']) {
         try {
           return ffi.DynamicLibrary.open(name);
-        } catch (_) {
+        } catch (e) {
+          lastError = e;
           continue;
         }
       }
       throw UnsupportedError(
-        'ICU library not found on Linux. Install via: apt install libicu-dev',
+        'ICU library not found on Linux. Install via: apt install libicu-dev. Last error: $lastError',
       );
     } else {
       throw UnsupportedError('Platform not supported: ${Platform.operatingSystem}');
