@@ -43,6 +43,7 @@ class KinsokuProcessor {
   static const Set<String> gyotoKinsoku = {
     '。', '、', // Periods and commas (can hang)
     '）', '」', '】', '』', '〉', '》', // Closing brackets (can hang)
+    '\u2019', '\u201D', '»', '〟', // Closing quotation marks (can hang)
     'ー', // Long vowel mark (cannot hang, must use oikomi)
   };
 
@@ -53,6 +54,7 @@ class KinsokuProcessor {
   static const Set<String> burasageAllowed = {
     '。', '、', // Periods and commas
     '）', '」', '】', '』', '〉', '》', // Closing brackets
+    '\u2019', '\u201D', '»', '〟', // Closing quotation marks
   };
 
   /// Characters that cannot hang (must use oikomi when line breaking)
@@ -70,6 +72,7 @@ class KinsokuProcessor {
   /// must be pushed to the next line with this character.
   static const Set<String> gyomatsuKinsoku = {
     '（', '「', '【', '『', '〈', '《', // Opening brackets
+    '\u2018', '\u201C', '«', '〝', // Opening quotation marks
   };
 
   /// Characters that must appear in pairs (e.g., ……, ‥‥, ――)

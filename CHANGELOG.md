@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.3.7] - 2026-02-06
+
+### Fixed
+- **Missing quotation marks in kinsoku rules**: Add 8 quotation mark characters per JIS X 4051 / JLREQ
+  - Opening (行末禁則): `'` (U+2018), `"` (U+201C), `«` (U+00AB), `〝` (U+301D)
+  - Closing (行頭禁則): `'` (U+2019), `"` (U+201D), `»` (U+00BB), `〟` (U+301F)
+  - Updated `JisX4051Classes` (class1/class2), `KinsokuProcessor`, and `CharacterClassifier`
+
 ## [0.3.6] - 2026-02-02
 
 ### Fixed

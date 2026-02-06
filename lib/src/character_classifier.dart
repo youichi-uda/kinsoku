@@ -8,6 +8,9 @@ class CharacterClassifier {
   static const _yakumonoChars = {
     '。', '、', '・', '（', '）', '「', '」', '【', '】',
     '『', '』', '〈', '〉', '《', '》', '！', '？', '：', '；',
+    '\u2018', '\u2019', '\u201C', '\u201D', // Smart quotation marks
+    '«', '»', // Guillemets
+    '〝', '〟', // Double prime quotation marks
     'ー', // Long vowel mark (U+30FC)
     '―', // Horizontal bar / Dash (U+2015)
     '—', // Em dash (U+2014)
@@ -20,6 +23,8 @@ class CharacterClassifier {
   static const _rotatableYakumono = {
     '（', '）', '「', '」', '【', '】', '『', '』',
     '〈', '〉', '《', '》',
+    '\u2018', '\u2019', '\u201C', '\u201D', // Smart quotation marks
+    '«', '»', // Guillemets
     'ー', // Long vowel mark (U+30FC)
     '―', // Horizontal bar / Dash (U+2015)
     '—', // Em dash (U+2014)
@@ -39,10 +44,16 @@ class CharacterClassifier {
   };
 
   /// Opening brackets
-  static const _openingBrackets = {'（', '「', '【', '『', '〈', '《'};
+  static const _openingBrackets = {
+    '（', '「', '【', '『', '〈', '《',
+    '\u2018', '\u201C', '«', '〝', // Opening quotation marks
+  };
 
   /// Closing brackets
-  static const _closingBrackets = {'）', '」', '】', '』', '〉', '》'};
+  static const _closingBrackets = {
+    '）', '」', '】', '』', '〉', '》',
+    '\u2019', '\u201D', '»', '〟', // Closing quotation marks
+  };
 
   /// Classify a single character
   ///

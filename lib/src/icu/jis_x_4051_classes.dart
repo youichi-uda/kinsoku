@@ -27,6 +27,10 @@ class JisX4051Classes {
     '〚': '\u301A', // LEFT WHITE SQUARE BRACKET
     '｟': '\uFF5F', // FULLWIDTH LEFT WHITE PARENTHESIS
     '｢': '\uFF62', // HALFWIDTH LEFT CORNER BRACKET
+    '\u2018': '\u2018', // LEFT SINGLE QUOTATION MARK
+    '\u201C': '\u201C', // LEFT DOUBLE QUOTATION MARK
+    '«': '\u00AB', // LEFT-POINTING DOUBLE ANGLE QUOTATION MARK
+    '〝': '\u301D', // REVERSED DOUBLE PRIME QUOTATION MARK
   };
 
   /// Class 2: Closing brackets (終わり括弧類)
@@ -49,6 +53,10 @@ class JisX4051Classes {
     '〛': '\u301B', // RIGHT WHITE SQUARE BRACKET
     '｠': '\uFF60', // FULLWIDTH RIGHT WHITE PARENTHESIS
     '｣': '\uFF63', // HALFWIDTH RIGHT CORNER BRACKET
+    '\u2019': '\u2019', // RIGHT SINGLE QUOTATION MARK
+    '\u201D': '\u201D', // RIGHT DOUBLE QUOTATION MARK
+    '»': '\u00BB', // RIGHT-POINTING DOUBLE ANGLE QUOTATION MARK
+    '〟': '\u301F', // LOW DOUBLE PRIME QUOTATION MARK
   };
 
   /// Class 3: Delimiter characters (Japanese) (句読点類)
